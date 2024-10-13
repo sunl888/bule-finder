@@ -1,21 +1,45 @@
-function inArray(arr, key, val) {
-  for (let i = 0; i < arr.length; i++) {
-    if (arr[i][key] === val) {
-      return i
-    }
-  }
-  return -1
-}
-
 Page({
   data: {
-    devices: [], // 设备列表
-    deviceTimeout: 10000 // 超过10秒未更新的设备将移除
+    devices: [], // 实时显示的设备列表
+    tempDevices: [], // 临时存储的新设备信息
+    deviceTimeout: 10000, // 超过10秒未更新的设备将移除
+    refreshInterval: null // 保存定时器ID
   },
 
   onLoad(query) {
+    // 开启蓝牙
     this.openBluetoothAdapter();
+    // 监听蓝牙状态改变
     this.bluetoothAdapterStateChange();
+    // 启动刷新定时器
+    this.startDeviceRefreshInterval(); 
+  },
+
+  onUnload() {
+    this.stopDeviceRefreshInterval(); // 页面卸载时停止定时器
+  },
+
+  // 启动定时器，每秒刷新设备列表
+  startDeviceRefreshInterval() {
+    this.setData({
+      refreshInterval: setInterval(() => {
+        const currentTime = new Date().getTime();
+        let tempDevices = this.data.tempDevices;
+        // 移除超过一定时间没有更新的设备
+        tempDevices = tempDevices.filter(device => currentTime - device.timestamp <= this.data.deviceTimeout);
+        // 按距离从近到远排序
+        tempDevices.sort((a, b) => a.distance - b.distance);
+        // 更新设备列表
+        this.setData({
+          devices: tempDevices
+        });
+      }, 800) // 每0.8秒刷新一次
+    });
+  },
+
+  // 停止定时器
+  stopDeviceRefreshInterval() {
+    clearInterval(this.data.refreshInterval);
   },
 
   bluetoothAdapterStateChange() {
@@ -81,7 +105,7 @@ Page({
         const isNear = distance < 3; // 设备靠近的标志
         const deviceInfo = {
           name: device.name || '未知设备',
-          RSSI: device.RSSI,
+          rssi: device.RSSI,
           deviceId: device.deviceId,
           distance: distance,
           isNear: isNear,
@@ -94,16 +118,9 @@ Page({
           // 更新已有设备的信息
           foundDevices[indexOf] = deviceInfo;
         }
-      });
-      
-      // 移除长时间没有更新的设备
-      const updatedDevices = foundDevices.filter(device => {
-        return currentTime - device.timestamp <= this.data.deviceTimeout;
-      });
-      // 按距离排序，距离从近到远
-      updatedDevices.sort((a, b) => a.distance - b.distance);
+      }); 
       // 更新设备列表
-      this.setData({ devices: updatedDevices });
+      this.setData({ tempDevices: foundDevices });
     });
   },
 
