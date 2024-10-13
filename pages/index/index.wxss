@@ -1,0 +1,45 @@
+.search-wrapper {
+  background-color: #fff;
+  height: 100vh;
+  font-size: 28rpx;
+}
+
+
+.result-list {
+  margin-top: 88rpx;
+}
+
+.ble-box {
+  padding-bottom: 20rpx;
+  border-bottom: 20rpx solid #f5f5f5;
+}
+
+.ble-section {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 228rpx;
+  padding: 0 30rpx;
+  border-top: 1px solid #f0f0f0;
+}
+
+.ble-info {
+  margin: 0 20rpx;
+  font-size: 26rpx;
+  color: #666;
+  width: 95%;
+}
+
+.ble-info>view {
+  margin-bottom: 6rpx;
+}
+
+.ble-name {
+  font-size: 34rpx;
+  color: #333;
+  padding-right: 10rpx;
+}
+
+.ble-tips {
+  color: rgb(255, 0, 0)
+}
